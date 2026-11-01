@@ -1,6 +1,6 @@
 package com.fleetbootcamp.telemetry.kafka;
 
-import com.fleetbootcamp.telemetry.Topics;
+import com.fleetbootcamp.telemetry.kafka.Topics;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

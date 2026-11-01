@@ -1,4 +1,4 @@
-package com.fleetbootcamp.telemetry;
+package com.fleetbootcamp.telemetry.kafka;
 
 /** Kafka topic names (created by the kafka-init container in docker-compose.yml). */
 public final class Topics {

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -24,14 +25,14 @@ public class HeartbeatController {
     }
 
     @PostMapping("/heartbeats")
-    public ResponseEntity> ingest(@Valid @RequestBody HeartbeatRequest request) {
+    public ResponseEntity ingest(@Valid @RequestBody HeartbeatRequest request) {
         TelemetryEvent event = ingestService.process(request);
 
-        return ResponseEntity.status(HttpStatus.ACCEPTED)
-                .body(Map.of(
-                        "status", "accepted",
-                        "vin", event.getVin(),
-                        "ts_utc", event.getTsUtc().toString()
-                ));
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", "accepted");
+        body.put("vin", event.vin());
+        body.put("ts_utc", event.tsUtc().toString());
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(body);
     }
 }
