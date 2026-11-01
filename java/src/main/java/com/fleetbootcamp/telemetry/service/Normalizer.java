@@ -11,11 +11,25 @@ public final class Normalizer {
     }
 
     public static TelemetryEvent normalize(HeartbeatRequest hb) {
-        // TODO M1:
-        //  - schema = TelemetryEvent.SCHEMA_V1, vin upper-cased
-        //  - odometer_km: convert when odometer_unit == "mi" (OEM-B devices report miles); null unit means km
-        //  - ts_utc = hb.ts().toInstant()
-        //  - unit tests: km, mi, an IST (+05:30) timestamp, an unknown unit
-        throw new UnsupportedOperationException("M1: implement normalize");
+        // 1. Calculate odometer in km
+        Double odometerKm = hb.odometer();
+        if (odometerKm != null && "mi".equalsIgnoreCase(hb.odometerUnit())) {
+            odometerKm = odometerKm * KM_PER_MILE;
+        }
+
+        // 2. Build and return the normalized TelemetryEvent
+        return new TelemetryEvent(
+                TelemetryEvent.SCHEMA_V1,
+                hb.vin() != null ? hb.vin().toUpperCase() : null,
+                hb.ts() != null ? hb.ts().toInstant() : null,
+                hb.speedKmph(),
+                odometerKm,
+                hb.lat(),
+                hb.lon(),
+                hb.heading(),
+                hb.socPct(),
+                hb.ignition(),
+                hb.sourceOem()
+        );
     }
 }
