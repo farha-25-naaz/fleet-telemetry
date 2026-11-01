@@ -26,12 +26,11 @@ public class TelemetryRepository {
     }
 
     public boolean insert(TelemetryEvent e) {
-        String sql = "INSERT INTO telemetry (schema, vin, ts_utc, speed_kmph, odometer_km, lat, lon, heading, soc_pct, ignition, source_oem) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
+        String sql = "INSERT INTO telemetry (vin, ts_utc, speed_kmph, odometer_km, lat, lon, heading, soc_pct, ignition, source_oem) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
                      "ON CONFLICT (vin, ts_utc) DO NOTHING";
         
         int rowsAffected = jdbc.update(sql,
-                e.schema(),
                 e.vin(),
                 e.tsUtc().atOffset(ZoneOffset.UTC),
                 e.speedKmph(),
@@ -49,7 +48,7 @@ public class TelemetryRepository {
     private TelemetryEvent mapRowToTelemetry(ResultSet rs, int rowNum) throws SQLException {
         Instant ts = rs.getTimestamp("ts_utc") != null ? rs.getTimestamp("ts_utc").toInstant() : null;
         return new TelemetryEvent(
-                rs.getString("schema"),
+                null,
                 rs.getString("vin"),
                 ts,
                 rs.getDouble("speed_kmph"),
@@ -64,7 +63,7 @@ public class TelemetryRepository {
     }
 
     public TelemetryEvent latest(String vin) {
-        String sql = "SELECT schema, vin, ts_utc, speed_kmph, odometer_km, lat, lon, heading, soc_pct, ignition, source_oem " +
+        String sql = "SELECT vin, ts_utc, speed_kmph, odometer_km, lat, lon, heading, soc_pct, ignition, source_oem " +
                      "FROM telemetry WHERE vin = ? ORDER BY ts_utc DESC LIMIT 1";
         List<TelemetryEvent> results = jdbc.query(sql, this::mapRowToTelemetry, vin);
         return results.isEmpty() ? null : results.get(0);
@@ -72,7 +71,7 @@ public class TelemetryRepository {
 
     public List<TelemetryEvent> range(String vin, Instant from, Instant to, int limit, Instant cursor) {
         StringBuilder sql = new StringBuilder(
-            "SELECT schema, vin, ts_utc, speed_kmph, odometer_km, lat, lon, heading, soc_pct, ignition, source_oem " +
+            "SELECT vin, ts_utc, speed_kmph, odometer_km, lat, lon, heading, soc_pct, ignition, source_oem " +
             "FROM telemetry WHERE vin = ? AND ts_utc >= ? AND ts_utc <= ?"
         );
         
